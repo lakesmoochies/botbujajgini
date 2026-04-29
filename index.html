@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Store Bot — Command List</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Syne:wght@400;600;800&display=swap');
+  :root{--bg:#0a0a0f;--bg2:#0f0f1a;--bg3:#141420;--border:#1e1e30;--text:#e0e0f0;--muted:#5a5a7a;--c-owner:#bd93f9;--c-admin:#ffd93d;--c-harga:#ff6b6b;--c-qris:#6bcb77;--c-ai:#ff6bdf;--c-clone:#6bfff0;--c-grup:#ff9f43;--c-customer:#4d96ff}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(77,150,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(77,150,255,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+  .wrap{max-width:900px;margin:0 auto;padding:40px 20px 80px;position:relative;z-index:1}
+  .header{text-align:center;margin-bottom:36px}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:100px;padding:5px 14px;font-size:11px;color:var(--c-customer);margin-bottom:14px;letter-spacing:1px}
+  .dot{width:6px;height:6px;border-radius:50%;background:#6bcb77;box-shadow:0 0 6px #6bcb77;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  h1{font-family:'Syne',sans-serif;font-size:clamp(26px,5vw,46px);font-weight:800;background:linear-gradient(135deg,#4d96ff,#ff6bdf,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+  .sub{color:var(--muted);font-size:12px;letter-spacing:1px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:28px}
+  .stat{background:var(--bg2);padding:12px;text-align:center}
+  .stat-n{font-size:20px;font-weight:800;color:var(--c-customer)}
+  .stat-l{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:1px}
+  .search-wrap{position:relative;margin-bottom:16px}
+  .search-wrap::before{content:'⌕';position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px;pointer-events:none}
+  #search{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 50px 12px 44px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
+  #search:focus{border-color:var(--c-customer);box-shadow:0 0 0 3px rgba(77,150,255,.1)}
+  #search::placeholder{color:var(--muted)}
+  .search-n{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted)}
+  .filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:24px}
+  .fb{padding:5px 12px;border-radius:100px;border:1px solid var(--border);background:var(--bg3);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s}
+  .fb:hover{color:var(--text);border-color:#333}
+  .fb.on{background:rgba(77,150,255,.1);border-color:var(--c-customer);color:var(--text)}
+  .section{margin-bottom:24px;animation:fi .3s ease}
+  @keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .sh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .st{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:4px}
+  .sl{flex:1;height:1px;background:var(--border)}
+  .sn{font-size:11px;color:var(--muted)}
+  .cards{display:flex;flex-direction:column;gap:3px}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+  .card:hover{background:var(--bg3);transform:translateX(3px)}
+  .card:hover .cb{opacity:1}
+  .cb{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;opacity:0;transition:opacity .15s}
+  .ci{width:32px;height:32px;border-radius:7px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .cc{font-size:13px;font-weight:700;margin-bottom:2px}
+  .cd{font-size:11px;color:var(--muted);line-height:1.4}
+  .ct{font-size:10px;padding:3px 8px;border-radius:4px;flex-shrink:0;align-self:center;letter-spacing:.5px;transition:all .2s}
+  .empty{display:none;text-align:center;padding:60px;color:var(--muted);font-size:13px}
+  .ei{font-size:36px;display:block;margin-bottom:10px}
+  .footer{text-align:center;margin-top:48px;font-size:11px;color:var(--muted);letter-spacing:2px}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="badge"><div class="dot"></div>STORE BOT v5.2</div>
+    <h1>Command List</h1>
+    <p class="sub">// klik command untuk copy · @bujajg</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="s0">0</div><div class="stat-l">Total</div></div>
+    <div class="stat"><div class="stat-n" id="s1" style="color:var(--c-owner)">0</div><div class="stat-l">Owner</div></div>
+    <div class="stat"><div class="stat-n" id="s2" style="color:var(--c-admin)">0</div><div class="stat-l">Admin</div></div>
+    <div class="stat"><div class="stat-n" id="s3" style="color:var(--c-ai)">0</div><div class="stat-l">AI</div></div>
+  </div>
+
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="cari command... contoh: harga, qris, ai, clone" autocomplete="off">
+    <div class="search-n" id="sn"></div>
+  </div>
+
+  <div class="filters">
+    <button class="fb on" data-f="all">semua</button>
+    <button class="fb" data-f="customer">🛍️ customer</button>
+    <button class="fb" data-f="admin">⚙️ admin</button>
+    <button class="fb" data-f="harga">💰 harga</button>
+    <button class="fb" data-f="qris">💳 qris</button>
+    <button class="fb" data-f="ai">🤖 ai</button>
+    <button class="fb" data-f="clone">🔗 clone</button>
+    <button class="fb" data-f="grup">👥 grup</button>
+    <button class="fb" data-f="owner">👑 owner</button>
+  </div>
+
+  <div id="main"></div>
+  <div class="empty" id="empty"><span class="ei">🔍</span>command tidak ditemukan</div>
+  <div class="footer">── STORE BOT · @bujajg ──</div>
+</div>
+
+<script>
+const CATS={
+  customer:{label:'🛍️ CUSTOMER',color:'#4d96ff'},
+  admin:   {label:'⚙️ ADMIN',color:'#ffd93d'},
+  harga:   {label:'💰 KELOLA HARGA',color:'#ff6b6b'},
+  qris:    {label:'💳 QRIS & PEMBAYARAN',color:'#6bcb77'},
+  ai:      {label:'🤖 AI FEATURE',color:'#ff6bdf'},
+  clone:   {label:'🔗 CLONE BOT',color:'#6bfff0'},
+  grup:    {label:'👥 MANAJEMEN GRUP',color:'#ff9f43'},
+  owner:   {label:'👑 OWNER',color:'#bd93f9'},
+};
+const ORDER=['customer','admin','harga','qris','ai','clone','grup','owner'];
+
+const D=[
+  // CUSTOMER
+  {cmd:'/start',desc:'Buka menu utama bot',cat:'customer',icon:'🏪'},
+  {cmd:'/menu',desc:'Tampilkan menu belanja',cat:'customer',icon:'📋'},
+  {cmd:'/pay',desc:'Lihat metode pembayaran yang tersedia',cat:'customer',icon:'💳'},
+  {cmd:'/cekorder [invoice_id]',desc:'Cek status order kamu',cat:'customer',icon:'🔍'},
+
+  // ADMIN
+  {cmd:'/input',desc:'Input produk bulk — format: Kategori | Produk | Paket | Harga',cat:'admin',icon:'📥'},
+  {cmd:'/daftar_produk',desc:'Lihat semua produk beserta Plan ID-nya',cat:'admin',icon:'📦'},
+  {cmd:'/daftar_kategori',desc:'Lihat semua kategori',cat:'admin',icon:'🗂️'},
+  {cmd:'/hapus_produk [id]',desc:'Hapus produk beserta semua plannya',cat:'admin',icon:'🗑️'},
+  {cmd:'/hapus_kategori [id]',desc:'Hapus kategori beserta semua isinya',cat:'admin',icon:'🗑️'},
+  {cmd:'/hapus_plan [plan_id]',desc:'Hapus satu paket/plan saja',cat:'admin',icon:'🗑️'},
+  {cmd:'/konfirmasi [invoice_id]',desc:'Konfirmasi order manual',cat:'admin',icon:'✅'},
+  {cmd:'/batal_order [invoice_id]',desc:'Batalkan order customer',cat:'admin',icon:'❌'},
+  {cmd:'/kirim_akun [user_id] [akun]',desc:'Kirim akun manual ke customer',cat:'admin',icon:'📤'},
+  {cmd:'/buat_pengumuman [judul] | [isi]',desc:'Buat pengumuman toko',cat:'admin',icon:'📢'},
+  {cmd:'/hapus_pengumuman [id]',desc:'Hapus pengumuman',cat:'admin',icon:'🗑️'},
+
+  // HARGA
+  {cmd:'/ubah_harga',desc:'Lihat semua plan & harga beserta Plan ID — untuk ubah harga',cat:'harga',icon:'💰'},
+  {cmd:'/ubah_harga [plan_id] [harga]',desc:'Ubah harga satu plan — contoh: /ubah_harga abc123 25000',cat:'harga',icon:'✏️'},
+
+  // QRIS
+  {cmd:'/tambah_qris [kode] [nama] [no]',desc:'Tambah metode pembayaran baru',cat:'qris',icon:'💳'},
+  {cmd:'/hapus_qris [kode]',desc:'Hapus metode pembayaran',cat:'qris',icon:'🗑️'},
+  {cmd:'/upload_qris [kode]',desc:'Upload gambar QR — reply ke foto dulu lalu kirim command',cat:'qris',icon:'🖼️'},
+  {cmd:'/list_qris',desc:'Lihat semua QRIS beserta kode & status gambarnya',cat:'qris',icon:'📋'},
+  {cmd:'/bersih_qris',desc:'Hapus semua QRIS yang belum ada gambarnya sekaligus',cat:'qris',icon:'🧹'},
+
+  // AI
+  {cmd:'/set_ai_key [key]',desc:'Set API key AI — pesan otomatis dihapus biar aman',cat:'ai',icon:'🔑'},
+  {cmd:'/set_ai_key hapus',desc:'Hapus API key & nonaktifkan semua fitur AI',cat:'ai',icon:'🗑️'},
+  {cmd:'/set_ai_prompt [teks]',desc:'Ubah kepribadian AI — contoh: "Kamu CS bernama Bella, jawab santai"',cat:'ai',icon:'🧠'},
+  {cmd:'/ai_on',desc:'Aktifkan AI customer service di private chat',cat:'ai',icon:'🟢'},
+  {cmd:'/ai_off',desc:'Nonaktifkan AI di private chat',cat:'ai',icon:'🔴'},
+  {cmd:'/ai_grup_on',desc:'Aktifkan AI di grup — balas kalau di-mention atau direply',cat:'ai',icon:'🟢'},
+  {cmd:'/ai_grup_off',desc:'Nonaktifkan AI di grup',cat:'ai',icon:'🔴'},
+  {cmd:'/ai_grup_full',desc:'Full mode — AI baca semua pesan grup & otomatis balas yang relevan',cat:'ai',icon:'⚡'},
+  {cmd:'/ai_grup_normal',desc:'Kembali ke mode normal — AI hanya balas mention/reply saja',cat:'ai',icon:'↩️'},
+  {cmd:'/info_ai',desc:'Cek status AI: key, model, prompt, aktif/nonaktif',cat:'ai',icon:'📊'},
+  {cmd:'/tanya [pertanyaan]',desc:'Tanya AI langsung (admin/owner) — contoh: /tanya buatkan caption promo',cat:'ai',icon:'💬'},
+
+  // CLONE
+  {cmd:'/clone_bot [token] [nama] [hari]',desc:'Buat clone bot baru — contoh: /clone_bot 123:ABC MyShop 30',cat:'clone',icon:'🤖'},
+  {cmd:'/list_clones',desc:'Daftar semua clone bot beserta status & masa aktif',cat:'clone',icon:'📋'},
+  {cmd:'/start_clone [nama]',desc:'Jalankan clone bot yang sudah dibuat',cat:'clone',icon:'▶️'},
+  {cmd:'/stop_clone [nama]',desc:'Hentikan clone bot',cat:'clone',icon:'⏹️'},
+  {cmd:'/start_all',desc:'Jalankan semua clone sekaligus',cat:'clone',icon:'⏩'},
+  {cmd:'/stop_all',desc:'Hentikan semua clone sekaligus',cat:'clone',icon:'⏹️'},
+  {cmd:'/delete_clone [nama]',desc:'Hapus clone bot permanen beserta semua datanya',cat:'clone',icon:'🗑️'},
+  {cmd:'/perpanjang_clone [nama] [hari]',desc:'Perpanjang masa aktif clone bot',cat:'clone',icon:'⏳'},
+  {cmd:'/update_clone [nama]',desc:'Update script 1 clone ke versi terbaru (agar dapat fitur baru)',cat:'clone',icon:'🔄'},
+  {cmd:'/update_all_clones',desc:'Update script semua clone sekaligus ke versi terbaru',cat:'clone',icon:'🔄'},
+
+  // GRUP
+  {cmd:'/manage',desc:'Buka panel kelola grup — ketik di dalam grup',cat:'grup',icon:'⚙️'},
+  {cmd:'/setwelcome [teks]',desc:'Set pesan welcome untuk anggota baru',cat:'grup',icon:'👋'},
+  {cmd:'/setrules [teks]',desc:'Set peraturan grup',cat:'grup',icon:'📜'},
+  {cmd:'/rules',desc:'Tampilkan peraturan grup',cat:'grup',icon:'📜'},
+  {cmd:'/warn [reply] [alasan]',desc:'Beri peringatan member — reply ke pesannya dulu',cat:'grup',icon:'⚠️'},
+  {cmd:'/mute [reply] [1h/6h/12h/24h]',desc:'Mute member sementara — reply ke pesannya dulu',cat:'grup',icon:'🔇'},
+  {cmd:'/unmute [reply]',desc:'Unmute member',cat:'grup',icon:'🔊'},
+  {cmd:'/kick [reply] [alasan]',desc:'Kick member dari grup',cat:'grup',icon:'🚪'},
+  {cmd:'/note [nama] [isi]',desc:'Simpan catatan di grup',cat:'grup',icon:'📝'},
+  {cmd:'/notes',desc:'Lihat semua catatan grup',cat:'grup',icon:'📋'},
+  {cmd:'/antilink on/off',desc:'Toggle anti-link di grup',cat:'grup',icon:'🔗'},
+  {cmd:'/antikasar on/off',desc:'Toggle filter kata kasar di grup',cat:'grup',icon:'🤐'},
+
+  // OWNER
+  {cmd:'/tambah_admin [user_id] [nama]',desc:'Tambah admin baru',cat:'owner',icon:'👮'},
+  {cmd:'/hapus_admin [user_id]',desc:'Hapus admin',cat:'owner',icon:'🚫'},
+  {cmd:'/list_admin',desc:'Lihat daftar semua admin',cat:'owner',icon:'👥'},
+  {cmd:'/blokir [user_id] [alasan]',desc:'Blokir user dari menggunakan bot',cat:'owner',icon:'🔒'},
+  {cmd:'/unblokir [user_id]',desc:'Unblokir user',cat:'owner',icon:'🔓'},
+  {cmd:'/maintenance on/off',desc:'Toggle mode maintenance bot',cat:'owner',icon:'🔧'},
+  {cmd:'/set_nama [nama]',desc:'Ganti nama bot',cat:'owner',icon:'✏️'},
+  {cmd:'/cek_token [token]',desc:'Validasi token bot Telegram',cat:'owner',icon:'🔑'},
+];
+
+let filt='all', q='';
+
+function render(){
+  const fq=q.toLowerCase();
+  const fd=D.filter(d=>(filt==='all'||d.cat===filt)&&(!fq||d.cmd.toLowerCase().includes(fq)||d.desc.toLowerCase().includes(fq)));
+  document.getElementById('sn').textContent=fd.length+' command';
+  document.getElementById('empty').style.display=fd.length?'none':'block';
+  const main=document.getElementById('main');
+  main.innerHTML='';
+  const g={};ORDER.forEach(c=>g[c]=[]);
+  fd.forEach(d=>{if(g[d.cat])g[d.cat].push(d);});
+  ORDER.forEach(cat=>{
+    const items=g[cat];if(!items.length)return;
+    const info=CATS[cat];
+    const sec=document.createElement('div');sec.className='section';
+    sec.innerHTML=`<div class="sh"><span class="st" style="color:${info.color};background:${info.color}15">${info.label}</span><div class="sl"></div><span class="sn">${items.length}</span></div><div class="cards" id="g${cat}"></div>`;
+    main.appendChild(sec);
+    const cards=sec.querySelector(`#g${cat}`);
+    items.forEach(item=>{
+      const c=document.createElement('div');c.className='card';
+      c.innerHTML=`<div class="cb" style="background:${info.color}"></div><div class="ci">${item.icon}</div><div><div class="cc" style="color:${info.color}">${item.cmd}</div><div class="cd">${item.desc}</div></div><span class="ct" style="color:${info.color};background:${info.color}12">${item.cat}</span>`;
+      c.addEventListener('click',()=>{
+        navigator.clipboard.writeText(item.cmd).catch(()=>{});
+        const t=c.querySelector('.ct');
+        const pv=t.textContent,pc=t.style.color,pb=t.style.background;
+        t.textContent='copied!';t.style.color='#6bcb77';t.style.background='#6bcb7715';
+        setTimeout(()=>{t.textContent=pv;t.style.color=pc;t.style.background=pb;},1500);
+      });
+      cards.appendChild(c);
+    });
+  });
+}
+
+document.getElementById('s0').textContent=D.length;
+document.getElementById('s1').textContent=D.filter(d=>d.cat==='owner').length;
+document.getElementById('s2').textContent=D.filter(d=>d.cat==='admin').length;
+document.getElementById('s3').textContent=D.filter(d=>d.cat==='ai').length;
+
+document.getElementById('search').addEventListener('input',e=>{q=e.target.value.trim();render();});
+document.querySelectorAll('.fb').forEach(b=>b.addEventListener('click',()=>{
+  filt=b.dataset.f;
+  document.querySelectorAll('.fb').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');render();
+}));
+
+render();
+document.getElementById('search').focus();
+</script>
+</body>
+</html>
