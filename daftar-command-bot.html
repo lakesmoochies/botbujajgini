@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Store Bot v5.2 — Daftar Command</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161d;
+    --card: #181c26;
+    --border: #252a38;
+    --accent: #29d87c;
+    --accent2: #5b8dff;
+    --accent3: #ff6b6b;
+    --accent4: #f5c842;
+    --text: #e8ecf5;
+    --muted: #6b7494;
+    --badge-user: #1a3a2b;
+    --badge-admin: #1a2640;
+    --badge-owner: #302010;
+    --badge-grup: #2a1a35;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Background noise texture ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: .4;
+  }
+
+  /* ── HERO ── */
+  header {
+    position: relative;
+    padding: 64px 24px 48px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    top: -80px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 320px;
+    background: radial-gradient(ellipse, rgba(41,216,124,.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-block;
+    background: var(--badge-user);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .12em;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(41,216,124,.25);
+    margin-bottom: 20px;
+    animation: fadeDown .6s ease both;
+  }
+  header h1 {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1.1;
+    animation: fadeDown .6s .1s ease both;
+  }
+  header h1 span { color: var(--accent); }
+  header p.sub {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 15px;
+    animation: fadeDown .6s .2s ease both;
+  }
+
+  /* ── SEARCH ── */
+  .search-wrap {
+    max-width: 520px;
+    margin: 22px auto 0;
+    position: relative;
+    animation: fadeDown .6s .3s ease both;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 16px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+  #searchInput {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px 12px 44px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  #searchInput:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(41,216,124,.1);
+  }
+  #searchInput::placeholder { color: var(--muted); }
+  #clearSearch {
+    position: absolute;
+    right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none;
+    color: var(--muted); cursor: pointer;
+    font-size: 18px; line-height: 1;
+    display: none;
+    padding: 4px;
+  }
+  #clearSearch:hover { color: var(--text); }
+
+  /* ── SEARCH RESULTS ── */
+  #searchResults {
+    display: none;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+  #searchResultsCount {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    font-family: 'Space Mono', monospace;
+  }
+  #searchResultsCount span { color: var(--accent); }
+  .no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .no-results .emoji { font-size: 40px; display: block; margin-bottom: 12px; }
+  .search-highlight {
+    background: rgba(245,200,66,.25);
+    color: var(--accent4);
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+
+  /* ── NAV TABS ── */
+  nav {
+    display: flex;
+    gap: 8px;
+    padding: 20px 24px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(13,15,20,.92);
+    backdrop-filter: blur(16px);
+    z-index: 10;
+    scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    display: none;
+    animation: fadeIn .3s ease both;
+  }
+  .section.active { display: block; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── COMMAND CARD ── */
+  .cmd-grid {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+
+  .cmd-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    transition: border-color .2s, transform .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .cmd-card:hover {
+    border-color: rgba(41,216,124,.3);
+    transform: translateY(-2px);
+  }
+  .cmd-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 3px 0 0 3px;
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .cmd-card:hover::before { opacity: 1; }
+
+  .cmd-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .cmd-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    background: rgba(41,216,124,.08);
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(41,216,124,.2);
+    white-space: nowrap;
+  }
+  .cmd-name.blue {
+    color: var(--accent2);
+    background: rgba(91,141,255,.08);
+    border-color: rgba(91,141,255,.2);
+  }
+  .cmd-name.red {
+    color: var(--accent3);
+    background: rgba(255,107,107,.08);
+    border-color: rgba(255,107,107,.2);
+  }
+  .cmd-name.yellow {
+    color: var(--accent4);
+    background: rgba(245,200,66,.08);
+    border-color: rgba(245,200,66,.2);
+  }
+  .cmd-name.purple {
+    color: #c084fc;
+    background: rgba(192,132,252,.08);
+    border-color: rgba(192,132,252,.2);
+  }
+
+  .cmd-badges {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-left: auto;
+  }
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    padding: 3px 9px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+  .badge-user   { background: var(--badge-user);  color: var(--accent);  border: 1px solid rgba(41,216,124,.25); }
+  .badge-admin  { background: var(--badge-admin); color: var(--accent2); border: 1px solid rgba(91,141,255,.25); }
+  .badge-owner  { background: var(--badge-owner); color: var(--accent4); border: 1px solid rgba(245,200,66,.25); }
+  .badge-grup   { background: var(--badge-grup);  color: #c084fc;        border: 1px solid rgba(192,132,252,.25); }
+
+  .cmd-desc {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  .cmd-desc strong { color: var(--text); }
+
+  .cmd-format {
+    margin-top: 12px;
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: #7ec9a8;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  /* ── CHAT BUBBLE DEMO ── */
+  .demo-box {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 14px;
+  }
+  .demo-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .bubble-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: flex-end;
+  }
+  .bubble-row.right { flex-direction: row-reverse; }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .av-user  { background: #1a2a40; color: var(--accent2); }
+  .av-bot   { background: #1a3a2b; color: var(--accent); }
+  .av-admin { background: #302010; color: var(--accent4); }
+  .bubble {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .bubble-user  { background: #1a2a40; border-bottom-right-radius: 4px; }
+  .bubble-bot   { background: #1c2b1f; border-bottom-left-radius: 4px; }
+  .bubble-admin { background: #2a1f10; border-bottom-right-radius: 4px; }
+  .bubble-sys   { background: #1d1d2a; border-bottom-left-radius: 4px; border: 1px solid rgba(245,200,66,.2); }
+  .bubble strong { font-weight: 700; }
+  .bubble .mono { font-family: 'Space Mono', monospace; font-size: 11px; background: rgba(255,255,255,.06); padding: 1px 5px; border-radius: 4px; }
+  .bubble .g { color: var(--accent); }
+  .bubble .b { color: var(--accent2); }
+  .bubble .y { color: var(--accent4); }
+  .bubble .r { color: var(--accent3); }
+  .bubble .p { color: #c084fc; }
+  .chat-name { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+  .bubble-row.right .chat-name { text-align: right; }
+
+  /* ── TRIGGER TABLE ── */
+  .trigger-list { display: grid; gap: 8px; }
+  .trigger-item {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  .trigger-kw {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent4);
+    font-size: 12px;
+    min-width: 110px;
+  }
+  .trigger-desc { color: var(--muted); }
+
+  /* ── CRON BOX ── */
+  .cron-item {
+    display: flex; gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+  }
+  .cron-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent4);
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+  .cron-desc { font-size: 13.5px; color: var(--muted); }
+  .cron-desc strong { color: var(--text); }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-badge">Store Bot v5.2 — by @bujajg</div>
+  <h1>📋 Daftar <span>Command</span> Bot</h1>
+  <p class="sub">Dokumentasi lengkap semua perintah, contoh output grup & bot, dan cara penggunaan</p>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Cari command, misal: /warn, stok, monitoring..." autocomplete="off">
+    <button id="clearSearch" onclick="clearSearch()" title="Hapus pencarian">×</button>
+  </div>
+</header>
+
+<nav id="tabs">
+  <button class="tab-btn active" onclick="showTab('user')">👤 User</button>
+  <button class="tab-btn" onclick="showTab('admin')">⚙️ Admin</button>
+  <button class="tab-btn" onclick="showTab('owner')">👑 Owner</button>
+  <button class="tab-btn" onclick="showTab('grup')">👥 Grup</button>
+  <button class="tab-btn" onclick="showTab('ai')">🤖 AI</button>
+  <button class="tab-btn" onclick="showTab('monitor')">📋 Monitoring</button>
+  <button class="tab-btn" onclick="showTab('auto')">⏰ Auto</button>
+</nav>
+
+<div id="searchResults">
+  <div id="searchResultsCount"></div>
+  <div class="cmd-grid" id="searchResultsList"></div>
+</div>
+
+<main>
+
+<!-- ═══════════════════════ USER ═══════════════════════ -->
+<div class="section active" id="tab-user">
+  <p class="section-title">Perintah untuk semua pengguna (chat privat)</p>
+  <div class="cmd-grid">
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name">/start</span>
+        <span class="cmd-name">/menu</span>
+        <div class="cmd-badges"><span class="badge badge-user">User</span></div>
+      </div>
+      <div class="cmd-desc">Membuka menu utama bot dengan tombol belanja, keranjang, riwayat order, dan lainnya.</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Contoh Output — Chat Privat</div>
+        <div class="bubble-row right">
+          <div><div class="chat-name">Kamu</div><div class="bubble bubble-user">/start</div></div>
+          <div class="avatar av-user">K</div>
+        </div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="chat-name">Store Bot</div><div class="bubble bubble-bot">🏪 <strong>Store Bot</strong><br><br>Selamat datang! Pilih menu di bawah:<br><br>[🛍️ Belanja]  [🛒 Keranjang]<br>[📋 Riwayat]  [💳 Cara Bayar]<br>[📢 Promo]    [❓ Bantuan]<br>[👤 Profil Saya]<br><span class="g">[⚙️ Admin Panel]</span> ← khusus admin</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name">/cekorder</span>
+        <div class="cmd-badges"><span class="badge badge-user">User</span></div>
+      </div>
+      <div class="cmd-desc">Mengecek status order berdasarkan ID invoice. Hanya bisa cek order milik sendiri.</div>
+      <div class="cmd-format">/cekorder [invoice_id]
+Contoh: /cekorder INV-ABC123-7890</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Contoh Output</div>
+        <div class="bubble-row right">
+          <div><div class="chat-name">Kamu</div><div class="bubble bubble-user">/cekorder INV-ABC123-7890</div></div>
+          <div class="avatar av-user">K</div>
+        </div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="chat-name">Store Bot</div><div class="bubble bubble-bot">🧾 <span class="mono">INV-ABC123-7890</span><br>📊 <strong><span class="g">🎉 Selesai</span></strong><br>💰 Rp15.000</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name">/pay</span>
+        <div class="cmd-badges"><span class="badge badge-user">User</span><span class="badge" style="background:#1a1a2a;color:#888;border:1px solid #333">Privat Only</span></div>
+      </div>
+      <div class="cmd-desc">Menampilkan semua metode pembayaran yang tersedia beserta nomor rekening dan QR Code.</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Contoh Output</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="chat-name">Store Bot</div><div class="bubble bubble-bot">💳 <strong>METODE PEMBAYARAN</strong><br>─────────────────────<br><br>💳 <strong>BCA</strong><br>📋 No: <span class="mono">1234567890</span><br>👤 A/N: Nama Pemilik<br><br>💳 <strong>DANA</strong><br>📋 No: <span class="mono">0812345678</span><br><br>[🖼️ QR BCA] [🖼️ QR DANA]<br>[🛍️ Belanja] [🔙 Menu]</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name">/list</span>
+        <div class="cmd-badges"><span class="badge badge-user">User</span><span class="badge badge-grup">Grup</span></div>
+      </div>
+      <div class="cmd-desc">Di <strong>chat privat</strong> → buka menu utama. Di <strong>grup</strong> → tampilkan daftar produk lengkap dengan harga dan stok.</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Contoh Output di Grup</div>
+        <div class="bubble-row right">
+          <div><div class="chat-name">Member</div><div class="bubble bubble-user">/list</div></div>
+          <div class="avatar av-user">M</div>
+        </div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="chat-name">Store Bot</div><div class="bubble bubble-bot">🛍️ <strong>PRODUK TERSEDIA</strong><br>─────────────────────<br><br>📺 <strong>Netflix</strong><br>  <span class="g">✅</span> 1 Bulan — <strong>Rp15.000</strong><br>  <span class="g">✅</span> 3 Bulan — <strong>Rp40.000</strong><br>  <span class="r">❌</span> 1 Tahun — <strong>Rp120.000</strong><br><br>🎵 <strong>Spotify</strong><br>  <span class="g">✅</span> 1 Bulan — <strong>Rp12.000</strong><br><br><em>Order via DM bot ya!</em><br><br>🤖 <em>by @bujajg</em></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════ ADMIN ═══════════════════════ -->
+<div class="section" id="tab-admin">
+  <p class="section-title">Perintah untuk Admin & Owner — khusus di chat privat dengan bot</p>
+  <div class="cmd-grid">
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/tambah_qris</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span><span class="badge badge-owner">Owner</span></div>
+      </div>
+      <div class="cmd-desc">Menambahkan metode pembayaran baru (QRIS/transfer).</div>
+      <div class="cmd-format">/tambah_qris [kode] [nama] [nomor]
+Contoh: /tambah_qris bca BCA 1234567890</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot"><span class="g">✅</span> QRIS <strong>BCA</strong> (bca) ditambahkan!<br><br>Upload QR dengan:<br>Kirim foto QR → reply → <span class="mono">/upload_qris bca</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/upload_qris</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Upload gambar QR Code untuk metode pembayaran. Harus digunakan dengan <strong>reply ke foto</strong>.</div>
+      <div class="cmd-format">1. Kirim foto QR ke bot
+2. Reply foto tersebut
+3. Ketik: /upload_qris [kode]
+Contoh: /upload_qris bca</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/list_qris</span>
+        <span class="cmd-name blue">/hapus_qris</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Melihat semua QRIS yang terdaftar, atau menghapus QRIS berdasarkan kode.</div>
+      <div class="cmd-format">/list_qris
+/hapus_qris [kode]   →   /hapus_qris bca</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/input</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Input produk massal sekaligus — kategori, produk, paket, harga. Satu baris = satu paket. Otomatis buat kategori & produk baru jika belum ada.</div>
+      <div class="cmd-format">/input
+Kategori | Produk | NamaPaket | Harga
+Netflix | Netflix | 1 Bulan | 15000
+Netflix | Netflix | 3 Bulan | 40000
+Spotify | Spotify | 1 Bulan | 12000</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot"><span class="g">✅</span> Berhasil: 3 | <span class="r">❌</span> Gagal: 0<br><br><em>Cek produk dengan /list_produk</em></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/stok_akun</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Upload stok akun ke plan tertentu. Ketik <span class="cmd-name blue" style="display:inline">/stok_akun [plan_id]</span> lalu bot akan minta akun satu per baris.</div>
+      <div class="cmd-format">/stok_akun [plan_id]
+Lalu kirim akun (1 per baris):
+email1@gmail.com|password1
+email2@gmail.com|password2</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output Setelah Upload</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot"><span class="g">✅</span> <strong>3 akun berhasil ditambahkan!</strong><br>Plan: Netflix 1 Bulan<br>Duplikat batch: 0<br>Duplikat existing: 0<br>Total stok: 5</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/konfirmasi</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Konfirmasi pembayaran order. Bot otomatis kirim akun ke customer (auto delivery).</div>
+      <div class="cmd-format">/konfirmasi [invoice_id]
+Contoh: /konfirmasi INV-ABC123-7890</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output ke Admin</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot"><span class="g">✅</span> Order <span class="mono">INV-ABC123-7890</span> dikonfirmasi.<br>🤖 Akun terkirim otomatis.<br><br>[💬 Kirim Pesan ke Customer]<br>[⏳ Order Pending]</div></div>
+        </div>
+        <div class="demo-label" style="margin-top:14px">📲 Pesan Otomatis ke Customer</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-sys">🎉 <strong>AKUN ANDA SUDAH SIAP!</strong><br><br>🆔 Order: <span class="mono">INV-ABC123-7890</span><br>──────────────────────<br><br>📦 <strong>Netflix 1 Bulan</strong><br><span class="mono">email@gmail.com|password123</span><br><br>──────────────────────<br>🔒 <em>Jangan bagikan ke siapapun!</em></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/batal_order</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Membatalkan order. Notif otomatis dikirim ke customer.</div>
+      <div class="cmd-format">/batal_order [invoice_id] [alasan]
+Contoh: /batal_order INV-ABC123-7890 Bukti tidak valid</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/kirim_akun</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Kirim akun/data manual langsung ke user tertentu via user ID.</div>
+      <div class="cmd-format">/kirim_akun [user_id] [akun/data]
+Contoh: /kirim_akun 123456789 email@gmail.com|pass123</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/blokir</span>
+        <span class="cmd-name blue">/unblokir</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Memblokir atau membuka blokir user dari menggunakan bot.</div>
+      <div class="cmd-format">/blokir [user_id] [alasan]     → /blokir 123456 Penipuan
+/unblokir [user_id]             → /unblokir 123456</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/buat_pengumuman</span>
+        <span class="cmd-name blue">/hapus_pengumuman</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Membuat atau menghapus pengumuman/promo yang tampil di menu Promo bot.</div>
+      <div class="cmd-format">/buat_pengumuman [judul] | [isi]
+Contoh: /buat_pengumuman Promo Lebaran | Diskon 20% semua produk!</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/hapus_kategori</span>
+        <span class="cmd-name blue">/hapus_produk</span>
+        <span class="cmd-name blue">/hapus_plan</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Menghapus kategori, produk, atau paket beserta seluruh stok akun yang terkait.</div>
+      <div class="cmd-format">/hapus_kategori [id]
+/hapus_produk [id]
+/hapus_plan [plan_id]
+
+Lihat ID dengan /daftar_kategori atau /daftar_produk</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/ubah_harga</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Mengubah harga paket. Ketik tanpa argumen untuk lihat daftar plan + ID-nya.</div>
+      <div class="cmd-format">/ubah_harga                   → tampilkan semua plan & ID
+/ubah_harga [plan_id] [harga_baru]
+Contoh: /ubah_harga abc123 25000</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/daftar_kategori</span>
+        <span class="cmd-name blue">/daftar_produk</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Menampilkan semua kategori atau produk lengkap dengan ID, Plan ID, stok, dan harga.</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/rekap_monitoring</span>
+        <span class="cmd-name blue">/pending_rnk</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Melihat rekap form monitoring dan daftar member yang belum posting #rnk.</div>
+      <div class="cmd-format">/rekap_monitoring              → semua data
+/rekap_monitoring pending       → yang belum rnk
+/rekap_monitoring done          → yang sudah rnk
+/rekap_monitoring muted         → yang kena mute</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════ OWNER ═══════════════════════ -->
+<div class="section" id="tab-owner">
+  <p class="section-title">Perintah eksklusif Owner — akses tertinggi</p>
+  <div class="cmd-grid">
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name yellow">/tambah_admin</span>
+        <span class="cmd-name yellow">/hapus_admin</span>
+        <div class="cmd-badges"><span class="badge badge-owner">Owner</span></div>
+      </div>
+      <div class="cmd-desc">Menambah atau menghapus admin bot.</div>
+      <div class="cmd-format">/tambah_admin [user_id] [nama]
+Contoh: /tambah_admin 123456789 Budi Admin
+
+/hapus_admin [user_id]
+Contoh: /hapus_admin 123456789</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot"><span class="g">✅</span> <strong>Budi Admin</strong> (<span class="mono">123456789</span>) ditambahkan sebagai admin!</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name yellow">/set_ai_key</span>
+        <div class="cmd-badges"><span class="badge badge-owner">Owner</span></div>
+      </div>
+      <div class="cmd-desc">Menyimpan API Key Mistral untuk fitur AI. Pesan akan otomatis dihapus setelah disimpan demi keamanan.</div>
+      <div class="cmd-format">/set_ai_key [mistral_api_key]
+Contoh: /set_ai_key abc123xyz789...</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot"><span class="g">✅</span> AI Key berhasil disimpan!<br>Aktifkan dengan: <span class="mono">/ai_on</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name yellow">/tambah_clone</span>
+        <div class="cmd-badges"><span class="badge badge-owner">Owner</span></div>
+      </div>
+      <div class="cmd-desc">Menambah bot clone yang berbagi database dengan bot utama. Clone punya nama & token sendiri.</div>
+      <div class="cmd-format">/tambah_clone [nama] [token_bot] [owner_id] [hari]
+Contoh: /tambah_clone TokoSatu 123:ABC... 987654 30</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name yellow">/start_clone</span>
+        <span class="cmd-name yellow">/stop_clone</span>
+        <span class="cmd-name yellow">/restart_clone</span>
+        <div class="cmd-badges"><span class="badge badge-owner">Owner</span></div>
+      </div>
+      <div class="cmd-desc">Mengontrol jalannya bot clone — start, stop, atau restart.</div>
+      <div class="cmd-format">/start_clone [nama]
+/stop_clone [nama]
+/restart_clone [nama]</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name yellow">/perpanjang_clone</span>
+        <div class="cmd-badges"><span class="badge badge-owner">Owner</span></div>
+      </div>
+      <div class="cmd-desc">Memperpanjang masa aktif bot clone.</div>
+      <div class="cmd-format">/perpanjang_clone [nama] [hari]
+Contoh: /perpanjang_clone TokoSatu 30</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name yellow">/cek_token</span>
+        <div class="cmd-badges"><span class="badge badge-owner">Owner</span></div>
+      </div>
+      <div class="cmd-desc">Mengecek validitas token bot Telegram dan menampilkan info bot tersebut.</div>
+      <div class="cmd-format">/cek_token [token]
+Contoh: /cek_token 7123456789:ABC...</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output (token valid)</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot"><span class="g">✅</span> <strong>INFO BOT</strong><br>─────────────────────────<br><br>🤖 Nama: <strong>Toko Satu Bot</strong><br>📛 Username: @tokosatubot<br>🆔 Bot ID: <span class="mono">7123456789</span><br>🔒 Token: <span class="mono">7123:AB...</span><br><br><em>Token valid ✅</em></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name yellow">/tagall</span>
+        <div class="cmd-badges"><span class="badge badge-owner">Owner</span><span class="badge badge-admin">Admin</span><span class="badge badge-grup">Grup</span></div>
+      </div>
+      <div class="cmd-desc">Broadcast blast mention ke semua member yang pernah DM bot, atau tag semua admin grup.</div>
+      <div class="cmd-format">/tagall [emoji] [pesan]
+Contoh: /tagall 📢 Ada promo hari ini!
+/tagall admin [pesan]   → tag admin grup saja</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output di Grup</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot">📢 Ada promo hari ini!<br><br>@user1 @user2 @user3 @user4 @user5 @user6 @user7 @user8...</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════ GRUP ═══════════════════════ -->
+<div class="section" id="tab-grup">
+  <p class="section-title">Perintah manajemen grup — bot harus dijadikan admin grup</p>
+  <div class="cmd-grid">
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name purple">/manage</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-admin">Admin Grup</span></div>
+      </div>
+      <div class="cmd-desc">Membuka panel kelola grup dengan tombol untuk mengatur anti-link, anti-kasar, welcome, rules, dan lainnya.</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output Panel Grup</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot">⚙️ <strong>KELOLA GRUP</strong><br>─────────────────────<br>Grup: Toko Kita<br><br>[🔗 Anti-Link: OFF]  [🤐 Anti-Kasar: OFF]<br>[👋 Welcome: OFF]    [📜 Atur Rules]<br>[📝 Lihat Rules]<br>[🔙 Tutup]</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name purple">/rules</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-user">Semua</span></div>
+      </div>
+      <div class="cmd-desc">Menampilkan peraturan grup yang sudah diatur admin.</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name purple">/warn</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-admin">Admin Grup</span></div>
+      </div>
+      <div class="cmd-desc">Memberikan peringatan kepada member. Setelah 3x warn, member otomatis dikick.</div>
+      <div class="cmd-format">Reply ke pesan user → /warn [alasan]
+Contoh: /warn Spam berlebihan</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output di Grup</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot">⚠️ @john_doe mendapat <strong>warn ke-2/3</strong>!<br>📌 Alasan: Spam berlebihan<br><br>⚠️ <em>1 warn lagi = auto kick!</em><br><br>🤖 <em>by @bujajg</em></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name purple">/mute</span>
+        <span class="cmd-name purple">/unmute</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-admin">Admin Grup</span></div>
+      </div>
+      <div class="cmd-desc">Membisukan atau membebaskan member dari kondisi mute.</div>
+      <div class="cmd-format">Reply ke pesan user → /mute [durasi_menit] [alasan]
+Contoh: /mute 30 Spam
+
+Reply ke pesan user → /unmute</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot">🔇 @john_doe di-mute selama <strong>30 menit</strong>!<br>📌 Alasan: Spam<br>⏰ Sampai: 14:30 WIB<br><br>🤖 <em>by @bujajg</em></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name purple">/kick</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-admin">Admin Grup</span></div>
+      </div>
+      <div class="cmd-desc">Mengeluarkan member dari grup (kick). User masih bisa join kembali.</div>
+      <div class="cmd-format">Reply ke pesan user → /kick [alasan]
+Contoh: /kick Melanggar peraturan</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name purple">/antilink</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-admin">Admin Grup</span></div>
+      </div>
+      <div class="cmd-desc">Mengaktifkan atau mematikan fitur anti-link. Pesan berisi link akan otomatis dihapus.</div>
+      <div class="cmd-format">/antilink on
+/antilink off</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot">🔗 Anti-Link <strong><span class="g">AKTIF ✅</span></strong>!</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name purple">/antikasar</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-admin">Admin Grup</span></div>
+      </div>
+      <div class="cmd-desc">Mengaktifkan filter kata kasar. Jika member mengirim kata kasar, dapat warn otomatis dan kick setelah 3x.</div>
+      <div class="cmd-format">/antikasar on
+/antikasar off</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name purple">/tagadmin</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-user">Semua</span></div>
+      </div>
+      <div class="cmd-desc">Mention (tag) semua admin grup sekaligus.</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot">📢 <strong>TAG ADMIN GRUP</strong><br><br>@admin1 @admin2 @admin3<br><br>🤖 <em>by @bujajg</em></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name purple">/announce</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-admin">Admin Grup</span></div>
+      </div>
+      <div class="cmd-desc">Mengirim pengumuman formal di grup dengan format rapi.</div>
+      <div class="cmd-format">/announce [pesan]
+Atau reply ke pesan + /announce</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot">📢 <strong>PENGUMUMAN</strong><br><br>Stok Netflix ready! Order sekarang.<br><br>🤖 <em>by @bujajg</em></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name purple">/del</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-admin">Admin Grup</span></div>
+      </div>
+      <div class="cmd-desc">Menghapus pesan. Reply ke pesan yang ingin dihapus lalu ketik /del.</div>
+      <div class="cmd-format">Reply ke pesan yang mau dihapus → /del</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name purple">/setnote</span>
+        <span class="cmd-name purple">/listnote</span>
+        <span class="cmd-name purple">/delnote</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Membuat <strong>dot-command</strong> — shortcut info yang bisa dipanggil member dengan mengetik <strong>.namanote</strong> di grup.</div>
+      <div class="cmd-format">/setnote [nama] [isi pesan]
+Contoh: /setnote netflix Harga Netflix:
+◇ 1 Bulan — Rp15.000
+◇ 3 Bulan — Rp40.000
+
+/listnote          → lihat semua note
+/delnote netflix   → hapus note</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Cara pakai di Grup — Member ketik .netflix</div>
+        <div class="bubble-row right">
+          <div><div class="chat-name">Member</div><div class="bubble bubble-user">.netflix</div></div>
+          <div class="avatar av-user">M</div>
+        </div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot">Harga Netflix:<br>◇ 1 Bulan — Rp15.000<br>◇ 3 Bulan — Rp40.000</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════ AI ═══════════════════════ -->
+<div class="section" id="tab-ai">
+  <p class="section-title">Pengaturan AI Chatbot (Mistral) — butuh API Key gratis dari console.mistral.ai</p>
+  <div class="cmd-grid">
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name red">/set_ai_key</span>
+        <div class="cmd-badges"><span class="badge badge-owner">Owner</span></div>
+      </div>
+      <div class="cmd-desc">Menyimpan Mistral API Key. Pesan otomatis dihapus setelah disimpan. Dapat key gratis di <strong>console.mistral.ai</strong>.</div>
+      <div class="cmd-format">/set_ai_key [mistral_api_key]</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name red">/ai_on</span>
+        <span class="cmd-name red">/ai_off</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Mengaktifkan atau mematikan AI untuk <strong>chat privat</strong> dengan bot.</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name red">/ai_grup_on</span>
+        <span class="cmd-name red">/ai_grup_off</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Mengaktifkan atau mematikan AI untuk <strong>chat di grup</strong>.</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name red">/ai_status</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Melihat status AI — key, mode private, mode grup, model yang digunakan.</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot">🤖 <strong>STATUS AI</strong><br><br>🔑 Key: <span class="g">✅ Sudah diset</span><br>💬 Private: <span class="g">🟢 Aktif</span><br>👥 Grup: <span class="r">🔴 Off</span><br>🧠 Model: mistral-small-latest</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name red">/set_ai_prompt</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Mengatur kepribadian AI — nama, gaya bicara, instruksi khusus.</div>
+      <div class="cmd-format">/set_ai_prompt [deskripsi]
+Contoh:
+/set_ai_prompt Kamu CS toko kami bernama Mia. Jawab ramah & singkat. Arahkan ke /menu untuk order.</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Contoh AI Auto-Reply di Chat Privat</div>
+        <div class="bubble-row right">
+          <div><div class="chat-name">Customer</div><div class="bubble bubble-user">Halo, ada netflix ga?</div></div>
+          <div class="avatar av-user">C</div>
+        </div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="chat-name">Store Bot (AI)</div><div class="bubble bubble-bot">Halo kak! 😊 Ada dong~<br>Netflix ready stok banyak nih!<br><br>Langsung order yuk lewat /menu ya kak 🛍️</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════ MONITORING ═══════════════════════ -->
+<div class="section" id="tab-monitor">
+  <p class="section-title">Sistem monitoring form & RNK — otomatis mute jika tidak posting #rnk dalam 24 jam</p>
+  <div class="cmd-grid">
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">.net / .netflix / .disney</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-user">Semua</span></div>
+      </div>
+      <div class="cmd-desc">Trigger di grup untuk memunculkan form monitoring. Member mengetik trigger ini dan bot kirim template form.</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Contoh di Grup — Member ketik .net</div>
+        <div class="bubble-row right">
+          <div><div class="chat-name">Buyer</div><div class="bubble bubble-user">.net</div></div>
+          <div class="avatar av-user">B</div>
+        </div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot">📋 <strong>FORM MONITORING NETFLIX</strong><br><br>👤 Nama &amp; USN Seller :<br>👤 Nama &amp; USN Buyer :<br>📱 No WA Buyer (aktif) :<br>📱 No WA Seller (aktif) :<br>⏳ Durasi :<br>📦 Plan (1u/2u/semi/share) :<br>📱 Device &amp; Lokasi :<br>📧 Email :<br>🖼️ SS Buyer :<br><br><em>Isi semua field lalu kirim ke grup</em><br><em>Wajib posting #rnk di grup dalam 24 jam!</em></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">.monitor [produk]</span>
+        <span class="cmd-name blue">.format [produk]</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span></div>
+      </div>
+      <div class="cmd-desc">Trigger form monitoring untuk produk custom selain yang sudah didefinisikan.</div>
+      <div class="cmd-format">.monitor Capcut
+.format Canva Pro</div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name">#rnk</span>
+        <div class="cmd-badges"><span class="badge badge-grup">Grup</span><span class="badge badge-user">Member</span></div>
+      </div>
+      <div class="cmd-desc">Member kirim hashtag ini setelah isi form monitoring. Sistem otomatis menandai sebagai done dan timer 24 jam dibatalkan.</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Flow Monitoring Lengkap</div>
+        <div class="bubble-row right">
+          <div><div class="chat-name">Buyer</div><div class="bubble bubble-user">👤 Nama &amp; USN Seller : @seller123<br>👤 Nama &amp; USN Buyer : @buyer456<br>📱 No WA Buyer : 0812xxx<br>...dst</div></div>
+          <div class="avatar av-user">B</div>
+        </div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot"><span class="g">✅</span> Form diterima @buyer456!<br><br>⚠️ <strong>WAJIB</strong> posting <strong>#rnk</strong> di grup dalam <strong>24 jam</strong><br>Kalau tidak, kamu akan otomatis di-mute! 🔇</div></div>
+        </div>
+        <div class="bubble-row right" style="margin-top:8px">
+          <div><div class="chat-name">Buyer (setelah transaksi)</div><div class="bubble bubble-user">#rnk seller amanah, barang cepat sampai! ⭐⭐⭐⭐⭐</div></div>
+          <div class="avatar av-user">B</div>
+        </div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot"><span class="g">✅</span> <strong>RNK @buyer456 sudah tercatat!</strong><br>Terima kasih sudah posting review 🙏</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-card">
+      <div class="cmd-top">
+        <span class="cmd-name blue">/trigger_monitor</span>
+        <div class="cmd-badges"><span class="badge badge-admin">Admin</span></div>
+      </div>
+      <div class="cmd-desc">Melihat daftar semua trigger form monitoring yang tersedia.</div>
+      <div class="demo-box">
+        <div class="demo-label">💬 Output</div>
+        <div class="bubble-row">
+          <div class="avatar av-bot">🤖</div>
+          <div><div class="bubble bubble-bot">📋 <strong>TRIGGER FORM MONITORING</strong><br><br>.net atau .netflix → Form Netflix<br>.disney → Form Disney+<br>.spotify → Form Spotify<br>.capcut → Form Capcut<br>.canva → Form Canva<br>.monitor [produk] → Form custom<br>.format [produk] → Form custom</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════ AUTO ═══════════════════════ -->
+<div class="section" id="tab-auto">
+  <p class="section-title">Tugas otomatis yang berjalan tanpa perintah manual</p>
+
+  <div class="cron-item">
+    <div class="cron-time">⏰ 20:00 WIB<br><span style="font-size:10px;color:#555">Setiap hari</span></div>
+    <div class="cron-desc"><strong>Laporan Harian Otomatis</strong><br>Bot kirim ringkasan ke Owner: total order hari ini, revenue, pending, dan jumlah stok habis.</div>
+  </div>
+  <div class="cron-item">
+    <div class="cron-time">⏰ 00:00 WIB<br><span style="font-size:10px;color:#555">Setiap hari</span></div>
+    <div class="cron-desc"><strong>Auto-Cancel Order Kadaluarsa</strong><br>Order berstatus <em>waiting_payment</em> yang sudah lebih dari 3 hari otomatis dibatalkan dan customer dinotif.</div>
+  </div>
+  <div class="cron-item">
+    <div class="cron-time">⏰ 09:00 WIB<br><span style="font-size:10px;color:#555">Setiap hari</span></div>
+    <div class="cron-desc"><strong>Alert Stok Akun</strong><br>Bot notif admin jika ada stok habis (❌) atau kritis ≤3 unit (⚠️) dan tampilkan tombol input akun.</div>
+  </div>
+  <div class="cron-item">
+    <div class="cron-time">⏰ Setiap jam<br><span style="font-size:10px;color:#555">Cron hourly</span></div>
+    <div class="cron-desc"><strong>Auto-Stop Clone Kadaluarsa</strong><br>Clone bot yang masa aktifnya habis otomatis dihentikan dan Owner dinotifikasi.</div>
+  </div>
+  <div class="cron-item">
+    <div class="cron-time">⏰ 24 jam<br><span style="font-size:10px;color:#555">Setelah form</span></div>
+    <div class="cron-desc"><strong>Auto-Mute RNK</strong><br>Jika member mengisi form monitoring tapi tidak posting <strong>#rnk</strong> dalam 24 jam, bot otomatis mute member tersebut.</div>
+  </div>
+
+  <div style="margin-top:24px">
+    <p class="section-title">🤖 Auto Delivery Akun</p>
+    <div class="cron-item">
+      <div class="cron-time">⚡ Instan<br><span style="font-size:10px;color:#555">Saat konfirmasi</span></div>
+      <div class="cron-desc"><strong>Auto Kirim Akun ke Customer</strong><br>Setelah admin konfirmasi pembayaran, bot langsung kirim akun dari stok ke customer via DM. Jika stok habis, admin dinotif untuk kirim manual.</div>
+    </div>
+    <div class="cron-item">
+      <div class="cron-time">⚡ Instan<br><span style="font-size:10px;color:#555">Saat customer kirim foto</span></div>
+      <div class="cron-desc"><strong>Deteksi Bukti Pembayaran</strong><br>Customer kirim foto ke bot → bot forward ke semua admin dengan tombol ✅ Konfirmasi / ❌ Tolak dan info invoice yang terdeteksi.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px">
+    <p class="section-title">💬 Trigger Kata Otomatis di Grup</p>
+    <div class="trigger-list">
+      <div class="trigger-item"><span class="trigger-kw">list / katalog</span><span class="trigger-desc">Bot otomatis tampilkan daftar produk</span></div>
+      <div class="trigger-item"><span class="trigger-kw">harga / info harga</span><span class="trigger-desc">Bot tampilkan katalog produk</span></div>
+      <div class="trigger-item"><span class="trigger-kw">mau order / mau beli</span><span class="trigger-desc">Bot tampilkan katalog produk</span></div>
+      <div class="trigger-item"><span class="trigger-kw">cara bayar / bayar</span><span class="trigger-desc">Bot tampilkan metode pembayaran</span></div>
+      <div class="trigger-item"><span class="trigger-kw">transfer ke mana</span><span class="trigger-desc">Bot tampilkan rekening/QRIS</span></div>
+      <div class="trigger-item"><span class="trigger-kw">[nama produk]</span><span class="trigger-desc">Jika nama produk/kategori ada di DB, bot auto-reply katalog</span></div>
+    </div>
+    <div class="demo-box" style="margin-top:14px">
+      <div class="demo-label">💬 Contoh Trigger Otomatis</div>
+      <div class="bubble-row right">
+        <div><div class="chat-name">Member</div><div class="bubble bubble-user">kak ada netflix ga?</div></div>
+        <div class="avatar av-user">M</div>
+      </div>
+      <div class="bubble-row">
+        <div class="avatar av-bot">🤖</div>
+        <div><div class="bubble bubble-bot">🛍️ <strong>PRODUK TERSEDIA</strong><br>─────────────────────<br><br>📺 <strong>Netflix</strong><br>  <span class="g">✅</span> 1 Bulan — <strong>Rp15.000</strong><br>  <span class="g">✅</span> 3 Bulan — <strong>Rp40.000</strong><br><br><em>Order via DM bot ya!</em><br>🤖 <em>by @bujajg</em></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+function showTab(id) {
+  exitSearch();
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function exitSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('clearSearch').style.display = 'none';
+  document.getElementById('searchResults').style.display = 'none';
+  document.querySelector('main').style.display = 'block';
+  document.getElementById('tabs').style.display = 'flex';
+}
+
+function clearSearch() {
+  exitSearch();
+  document.getElementById('searchInput').focus();
+}
+
+function doSearch(query) {
+  const q = query.trim().toLowerCase();
+  const clearBtn = document.getElementById('clearSearch');
+  const resultsDiv = document.getElementById('searchResults');
+  const mainDiv = document.querySelector('main');
+  const tabsNav = document.getElementById('tabs');
+
+  if (!q) { exitSearch(); return; }
+
+  clearBtn.style.display = 'block';
+  resultsDiv.style.display = 'block';
+  mainDiv.style.display = 'none';
+  tabsNav.style.display = 'none';
+
+  const allCards = document.querySelectorAll('#tab-user .cmd-card, #tab-admin .cmd-card, #tab-owner .cmd-card, #tab-grup .cmd-card, #tab-ai .cmd-card, #tab-monitor .cmd-card, #tab-auto .cmd-card');
+
+  const tabLabels = {
+    'tab-user': '👤 User',
+    'tab-admin': '⚙️ Admin',
+    'tab-owner': '👑 Owner',
+    'tab-grup': '👥 Grup',
+    'tab-ai': '🤖 AI',
+    'tab-monitor': '📋 Monitoring',
+    'tab-auto': '⏰ Auto',
+  };
+
+  const matched = [];
+  allCards.forEach(function(card) {
+    const text = card.innerText.toLowerCase();
+    if (text.includes(q)) {
+      let el = card.parentElement;
+      let tabId = null;
+      while (el) {
+        if (el.id && el.id.startsWith('tab-')) { tabId = el.id; break; }
+        el = el.parentElement;
+      }
+      matched.push({ card: card, tabId: tabId });
+    }
+  });
+
+  const list = document.getElementById('searchResultsList');
+  const count = document.getElementById('searchResultsCount');
+  list.innerHTML = '';
+
+  if (!matched.length) {
+    count.innerHTML = '<span>0</span> hasil untuk "' + query + '"';
+    list.innerHTML = '<div class="no-results"><span class="emoji">&#128269;</span>Tidak ada command yang cocok.<br>Coba kata kunci lain.</div>';
+    return;
+  }
+
+  count.innerHTML = '<span>' + matched.length + '</span> hasil untuk "' + query + '"';
+
+  function highlight(html, q) {
+    const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    return html.replace(re, '<mark class="search-highlight">$1</mark>');
+  }
+
+  matched.forEach(function(item) {
+    const clone = item.card.cloneNode(true);
+    clone.querySelectorAll('.demo-box').forEach(function(d) { d.remove(); });
+    clone.querySelectorAll('.cmd-name, .cmd-desc, .cmd-format').forEach(function(el) {
+      el.innerHTML = highlight(el.innerHTML, q);
+    });
+    if (item.tabId && tabLabels[item.tabId]) {
+      const label = document.createElement('div');
+      label.style.cssText = 'font-size:10px;color:var(--muted);margin-bottom:8px;font-family:Space Mono,monospace;letter-spacing:.1em;';
+      label.textContent = tabLabels[item.tabId];
+      clone.insertBefore(label, clone.firstChild);
+    }
+    list.appendChild(clone);
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  doSearch(this.value);
+});
+
+document.getElementById('searchInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') exitSearch();
+});
+</script>
+</body>
+</html>
